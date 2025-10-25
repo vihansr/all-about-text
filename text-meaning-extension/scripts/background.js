@@ -1,37 +1,29 @@
-const api_key = "jxEqs1rPZX8cxDvWFVSLkw==7aPU5lGq8TV5dvrI";
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("✅ Word Meaning Finder background script active.");
+});
 
-// Fetch synonyms from Datamuse
-async function fetchSynonyms(word) {
-  try {
-    const response = await fetch(`https://api.datamuse.com/words?rel_syn=${word}`);
-    const data = await response.json();
-    return data.slice(0, 4).map(item => item.word);
-  } catch (err) {
-    console.error(err);
-    return ["Error fetching synonyms"];
-  }
-}
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "fetchWordData") {
+    const word = message.word.trim().toLowerCase();
+    const apiUrl = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
 
-// Fetch antonyms from Datamuse
-async function fetchAntonyms(word) {
-  try {
-    const response = await fetch(`https://api.datamuse.com/words?rel_ant=${word}`);
-    const data = await response.json();
-    return data.slice(0, 4).map(item => item.word);
-  } catch (err) {
-    console.error(err);
-    return ["Error fetching antonyms"];
-  }
-}
+    fetch(apiUrl)
+      .then(response => {
+        if (!response.ok) throw new Error("Word not found");
+        return response.json();
+      })
+      .then(data => {
+        const entry = data[0];
+        const meaning = entry.meanings?.[0]?.definitions?.[0]?.definition || "No meaning found.";
+        const synonyms = entry.meanings?.[0]?.synonyms?.slice(0, 5) || [];
+        const antonyms = entry.meanings?.[0]?.antonyms?.slice(0, 5) || [];
+        sendResponse({ meaning, synonyms, antonyms });
+      })
+      .catch(error => {
+        console.error("Error fetching word data:", error);
+        sendResponse({ error: "Unable to fetch data." });
+      });
 
-// Listen for messages from content script
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "getWordData" && request.word) {
-    (async () => {
-      const synonyms = await fetchSynonyms(request.word);
-      const antonyms = await fetchAntonyms(request.word);
-      sendResponse({ synonyms, antonyms });
-    })();
-    return true; // Keep message channel open for async response
+    return true;
   }
 });
