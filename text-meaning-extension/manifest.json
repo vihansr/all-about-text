@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "All About Words",
+  "name": "All About Text",
   "version": "1.1",
   "description": "Find meanings, synonyms, and antonyms of selected words.",
   "permissions": ["activeTab", "scripting"],
