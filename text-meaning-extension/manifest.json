@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Word Meaning Finder",
-  "version": "1.0",
-  "description": "Find synonyms and antonyms of selected words.",
+  "name": "All About Words",
+  "version": "1.1",
+  "description": "Find meanings, synonyms, and antonyms of selected words.",
   "permissions": ["activeTab", "scripting"],
   "background": {
     "service_worker": "scripts/background.js"
